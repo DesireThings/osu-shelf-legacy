@@ -209,6 +209,9 @@ fn browse_error(err: Error) -> AppError {
         Error::NotFound | Error::HttpStatus(_) => {
             AppError::api("osu!Collector couldn't run this search. Try again later.")
         }
+        Error::Network(_) => {
+            AppError::api("Couldn't reach osu!Collector. Check your connection and try again.")
+        }
         other => AppError::api_dynamic(format!("Couldn't reach osu!Collector: {other}")),
     }
 }

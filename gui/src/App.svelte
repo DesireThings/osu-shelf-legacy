@@ -6,6 +6,7 @@
   import SettingsPage from "./lib/Settings.svelte";
   import Update from "./lib/Update.svelte";
   import Find from "./lib/Find.svelte";
+  import Browse from "./lib/Browse.svelte";
   import {
     detectInstalls,
     loadSettings,
@@ -15,7 +16,7 @@
   } from "./lib/api";
   import { initDownloads, store } from "./lib/store.svelte";
 
-  type Page = "setup" | "collections" | "import" | "find" | "update" | "settings";
+  type Page = "setup" | "collections" | "import" | "browse" | "find" | "update" | "settings";
 
   const steps: { id: Page; label: string; hint: string }[] = [
     { id: "setup", label: "Set up", hint: "Your osu! and a download folder" },
@@ -84,6 +85,17 @@
       {/each}
     </ol>
     <p class="group-label">More ways to get maps</p>
+    <button class="step" class:active={page === "browse"} onclick={() => (page = "browse")}>
+      <span class="num" aria-hidden="true">☰</span>
+      <span class="text">
+        <span class="label">Browse collections</span>
+        {#if store.browse.searching}
+          <span class="hint live">Searching…</span>
+        {:else}
+          <span class="hint">Search osu!Collector by name and size</span>
+        {/if}
+      </span>
+    </button>
     <button class="step" class:active={page === "find"} onclick={() => (page = "find")}>
       <span class="num" aria-hidden="true">⌕</span>
       <span class="text">
@@ -121,7 +133,10 @@
   </nav>
 
   <main class="content">
-    <div class="page" class:page-wide={page === "find" || page === "settings"}>
+    <div
+      class="page"
+      class:page-wide={page === "browse" || page === "find" || page === "settings"}
+    >
       {#if loadError}
         <div class="card error">
           <h2>Couldn't start</h2>
@@ -132,9 +147,11 @@
       {:else if page === "setup"}
         <Setup bind:settings {installs} onDone={() => (page = "collections")} />
       {:else if page === "collections"}
-        <Collections onNext={() => (page = "import")} />
+        <Collections onNext={() => (page = "import")} onBrowse={() => (page = "browse")} />
       {:else if page === "import"}
         <Import {settings} />
+      {:else if page === "browse"}
+        <Browse onReview={() => (page = "collections")} />
       {:else if page === "find"}
         <Find onSettings={() => (page = "settings")} onImport={() => (page = "import")} />
       {:else if page === "update"}

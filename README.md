@@ -81,6 +81,8 @@ makepkg -si
 2. **Add collections:** paste osucollector.com links, check the names and map counts, then **Download** or **Download all**. Collections download one after another; you can cancel, retry, or skip map sets that are waiting on a busy mirror.
 3. **Import into osu!:** for lazer, **Prepare import folder**, then follow the four steps the app shows. For stable, see [below](#importing-into-osu).
 
+**Browse collections** searches osu!Collector by name, uploader or description, with filters for size, stars and main mode; add what you want to your list.
+
 **Find maps** searches for maps without a collection (by name, stars, mapper, BPM and more), through osu! with your own API app or through nzbasic's map database with nothing to set up; tick what you want and download it.
 
 **Update collections** checks the collections you downloaded for maps added on osu!collector since and downloads only those; map sets you deleted from osu! stay left out unless you pick them again.
