@@ -8,6 +8,8 @@
     isActive,
     removeEntry,
     store,
+    type CollectionSort,
+    type Entry,
   } from "./store.svelte";
 
   let { onNext }: { onNext: () => void } = $props();
@@ -37,6 +39,44 @@
   function downloadAll() {
     for (const entry of notStarted) download(entry);
   }
+
+  type Ready = Extract<Entry, { state: "ready" }>;
+
+  const sorts: { id: CollectionSort; label: string; compare: (a: Ready, b: Ready) => number }[] = [
+    { id: "newest", label: "Newest first", compare: (a, b) => b.key - a.key },
+    { id: "oldest", label: "Oldest first", compare: (a, b) => a.key - b.key },
+    {
+      id: "name",
+      label: "Name A-Z",
+      compare: (a, b) =>
+        a.preview.name.localeCompare(b.preview.name, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }) || a.key - b.key,
+    },
+    {
+      id: "maps",
+      label: "Most maps",
+      compare: (a, b) => b.preview.beatmapsets - a.preview.beatmapsets || a.key - b.key,
+    },
+  ];
+
+  /** The tools hide below two collections, so the query must stop applying too. */
+  const showTools = $derived(ready.length > 1);
+  const query = $derived(showTools ? store.collectionsView.query.trim() : "");
+  const matches = $derived.by(() => {
+    const needle = query.toLowerCase();
+    return ready.filter(
+      (e) =>
+        e.preview.name.toLowerCase().includes(needle) ||
+        e.preview.uploader.toLowerCase().includes(needle),
+    );
+  });
+  /** Lookups and failures stay on top, past the filter, so a new link is never hidden. */
+  const visible = $derived<Entry[]>([
+    ...store.entries.filter((e) => e.state !== "ready").reverse(),
+    ...[...matches].sort(sorts.find((s) => s.id === store.collectionsView.sort)!.compare),
+  ]);
 </script>
 
 <header class="page-head">
@@ -72,8 +112,32 @@
     </div>
   {/if}
 
+  {#if showTools}
+    <div class="list-tools">
+      <input
+        class="text-input"
+        bind:value={store.collectionsView.query}
+        placeholder="Filter by name or uploader"
+        aria-label="Filter collections"
+      />
+      <select bind:value={store.collectionsView.sort} aria-label="Sort collections">
+        {#each sorts as sort (sort.id)}<option value={sort.id}>{sort.label}</option>{/each}
+      </select>
+    </div>
+    {#if query}
+      {#if matches.length > 0}
+        <p class="muted small list-count">Showing {matches.length} of {ready.length}</p>
+      {:else}
+        <p class="muted empty">
+          No collections match "{query}".
+          <button class="secondary" onclick={() => (store.collectionsView.query = "")}>Clear</button>
+        </p>
+      {/if}
+    {/if}
+  {/if}
+
   <ul class="entry-list">
-    {#each store.entries as entry (entry.key)}
+    {#each visible as entry (entry.key)}
       {@const status = entry.state === "ready" ? downloadFor(entry.preview.id) : undefined}
       <li class="card entry-card" class:entry-error={entry.state === "error"}>
         <div class="entry">
@@ -140,3 +204,26 @@
     </button>
   </div>
 {/if}
+
+<style>
+  .list-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 0 12px;
+  }
+  .list-tools .text-input {
+    min-width: 180px;
+  }
+  select {
+    font: inherit;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .list-count {
+    margin: 0 0 12px;
+  }
+</style>

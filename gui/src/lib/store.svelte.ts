@@ -1,5 +1,5 @@
-// App-wide state that outlives a screen: the collections the user added, the
-// last update scan and what's picked from it, the last search and its picks,
+// App-wide state that outlives a screen: the collections the user added and how
+// they're listed, the last update scan and what's picked from it, the last search and its picks,
 // and the downloads the backend is running. Switching pages in the sidebar keeps all of it.
 import {
   cancelDownload,
@@ -28,8 +28,12 @@ export type Entry =
   | { key: number; input: string; state: "ready"; preview: CollectionPreview }
   | { key: number; input: string; state: "error"; message: string };
 
+export type CollectionSort = "newest" | "oldest" | "name" | "maps";
+
 export const store = $state({
   entries: [] as Entry[],
+  /** How the Collections page shows the list. */
+  collectionsView: { query: "", sort: "newest" as CollectionSort },
   /** Latest status per download id. */
   downloads: {} as Record<number, DownloadStatus>,
   /** Errors from asking the backend to start a download, per entry key. */

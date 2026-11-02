@@ -15,7 +15,7 @@ The sidebar has three steps, then **Find maps**, **Update collections** and Sett
 
 ## 2. Add collections
 
-Paste a collection link from osucollector.com (or just its number) and press **Add** or <kbd>Enter</kbd>. The collection is looked up straight away and shows its name, uploader and map count. Add as many as you like.
+Paste a collection link from osucollector.com (or just its number) and press **Add** or <kbd>Enter</kbd>. The collection is looked up straight away and shows its name, uploader and map count. Add as many as you like. With two or more in the list, you can filter them by name or uploader and sort them; **Download all** still covers the whole list.
 
 - **Download** starts one collection; **Download all** starts every collection that isn't downloaded yet. Collections download one at a time, in order; each one already uses every download thread.
 - The card shows progress, how many map sets are downloading, and the size so far.
