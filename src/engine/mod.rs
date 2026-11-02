@@ -8,10 +8,9 @@
 use crate::{
     config::{
         Config,
-        constants::{APP_SUBDIR, LEGACY_APP_SUBDIR, USER_AGENT},
+        constants::{API_MAX_RETRIES, APP_SUBDIR, LEGACY_APP_SUBDIR, USER_AGENT},
         load_config_or_default, save_config,
     },
-    core::collection::{CollectionService, HttpCollectionService},
     osu_db::{BeatmapReader, LazerReader, OsuClient, StableReader},
     utils::{self, AppError, Result},
 };
@@ -133,13 +132,32 @@ pub struct CollectionPreview {
 pub const NOT_A_COLLECTION_LINK: &str = "That doesn't look like an osu!collector link. \
      It should look like https://osucollector.com/collections/12345";
 
+/// What the Add screen shows when fetching a collection fails: says what went
+/// wrong and what to try, instead of the HTTP or transport detail the CLI logs.
+fn friendly_fetch_error(err: &osu_downloader::Error) -> &'static str {
+    use osu_downloader::Error;
+    match err {
+        Error::NotFound => {
+            "That collection doesn't exist. It may have been deleted, or the link is wrong."
+        }
+        Error::RateLimited { .. } => {
+            "osu!collector is limiting requests. Wait a minute and try again."
+        }
+        Error::Timeout | Error::Network(_) => {
+            "Couldn't reach osu!collector. Check your connection and try again."
+        }
+        _ => "osu!collector returned something unexpected. Try again later.",
+    }
+}
+
 /// Resolve an osu!collector URL or bare id into its preview.
 pub async fn preview_collection(input: &str) -> Result<CollectionPreview> {
     let id = utils::parse_collection_id(input.trim())
         .map_err(|_| AppError::other(NOT_A_COLLECTION_LINK))?;
-    let collection = HttpCollectionService::new(CollectionClient::with_user_agent(USER_AGENT))
-        .fetch_collection(id)
-        .await?;
+    let collection = CollectionClient::with_user_agent(USER_AGENT)
+        .fetch_retrying(id, API_MAX_RETRIES)
+        .await
+        .map_err(|e| AppError::other(friendly_fetch_error(&e)))?;
     Ok(CollectionPreview {
         id: collection.id,
         beatmaps: collection
