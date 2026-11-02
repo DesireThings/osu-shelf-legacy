@@ -63,6 +63,8 @@ pub const USER_AGENT: &str = concat!(
     " (+https://github.com/DesireThings/osu-shelf)"
 );
 pub const AUTO_UPDATE_TIMEOUT: Duration = Duration::from_secs(60);
+/// The same line as the NOTICE file; shown by `--help`, `--version` and the TUI.
+pub const COPYRIGHT: &str = "Copyright (C) 2026 DesireThings";
 
 pub const SPEED_UPDATE_INTERVAL: Duration = Duration::from_millis(250);
 pub const SPEED_STALE_AFTER: Duration = Duration::from_secs(1);

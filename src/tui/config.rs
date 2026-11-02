@@ -1,10 +1,16 @@
 use crate::{
     app::runtime::ProbeResult,
     app::{ConfigField, ConfigTab},
-    config::{LogFormat, LogLevel, RetryFailedOnDownload, ThemeMode},
+    config::{LogFormat, LogLevel, RetryFailedOnDownload, ThemeMode, constants::COPYRIGHT},
     download::ArchiveValidation,
 };
-use ratatui::{Frame, layout::Rect, style::Stylize, text::Span};
+use ratatui::{
+    Frame,
+    layout::{Constraint, Layout, Rect},
+    style::Stylize,
+    text::{Line, Span},
+    widgets::Paragraph,
+};
 use std::collections::HashMap;
 
 use super::widgets;
@@ -45,6 +51,14 @@ const LABEL_AUTO_UPDATE: &str = "auto-update";
 const LABEL_PRERELEASES: &str = "prerelease channel";
 
 const THEME_MODE_LABELS: &[&str] = &["full", "compatible"];
+
+/// GPL 5(d)'s notices, under [`COPYRIGHT`]. Below the form rather than a row of
+/// it, so no scroll position hides them; the words that matter come first, so a
+/// narrow terminal clips only the tail.
+const LEGAL_NOTICE: [&str; 2] = [
+    "GPL-3.0-or-later, NO WARRANTY: free to share and change",
+    "licence text: osu-shelf --licences · github.com/DesireThings/osu-shelf",
+];
 
 const LOG_LEVELS: &[&str] = &["error", "warn", "info", "debug", "trace"];
 const LOG_FORMATS: &[&str] = &["compact", "pretty"];
@@ -102,6 +116,15 @@ pub fn render(
     mirror_latency: &HashMap<MirrorKind, Option<ProbeResult>>,
 ) {
     let show_chrome = area.height >= super::COMPACT_HEIGHT;
+    let notice_height = if show_chrome {
+        LEGAL_NOTICE.len() as u16 + 1
+    } else {
+        0
+    };
+    let [area, notice_area] =
+        Layout::vertical([Constraint::Min(0), Constraint::Length(notice_height)]).areas(area);
+    render_legal_notice(frame, notice_area);
+
     let items = build_config_items(
         form,
         show_chrome,
@@ -136,6 +159,14 @@ pub fn render(
         true,
         &form.list_offset,
     )
+}
+
+fn render_legal_notice(frame: &mut Frame, area: Rect) {
+    let lines: Vec<Line> = std::iter::once(COPYRIGHT)
+        .chain(LEGAL_NOTICE)
+        .map(|text| Line::from(format!("  {text}").fg(text_dim())))
+        .collect();
+    frame.render_widget(Paragraph::new(lines), area);
 }
 
 /// What the API app section says about the saved app, under its buttons.
