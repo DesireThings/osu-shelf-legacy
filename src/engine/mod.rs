@@ -19,6 +19,7 @@ use osu_downloader::collection::CollectionClient;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+pub mod browse;
 pub mod download;
 pub mod find;
 pub mod options;
@@ -27,6 +28,7 @@ pub mod updates;
 pub use crate::download::lazer_import::{
     IMPORT_FOLDER_NAME, ImportFolderReport, build_import_folder,
 };
+pub use browse::{BrowseCriteria, BrowsePage};
 pub use download::{DownloadStatus, Downloads, Failure, MirrorForecast, OnUpdate, Phase, RunKind};
 pub use find::{FindCheck, FindCriteria, FindOptions, FindPage, FindPick, Owned};
 pub use options::{
