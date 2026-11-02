@@ -1,11 +1,23 @@
 use crate::{
     app::update_source::MissingBeatmapset,
+    config::constants::COPYRIGHT,
     download::lazer_import::{IMPORT_FOLDER_NAME, build_import_folder},
     engine::updates,
     osu_db::{BeatmapReader, LazerReader, OsuClient, StableReader},
 };
-use std::{path::PathBuf, time::Instant};
+use std::{io::Write, path::PathBuf, time::Instant};
 use tracing::{info, warn};
+
+/// Everything `--licences` prints, written by build.rs.
+const LICENCES: &str = include_str!(concat!(env!("OUT_DIR"), "/licences.txt"));
+
+/// Under the first line of `--version` and `--help`: GPL 5(d)'s notices.
+const LEGAL_NOTICE: &str = "\
+License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Run `osu-shelf --licences` for the licence text and third-party licences.
+Source code: https://github.com/DesireThings/osu-shelf";
 
 #[derive(Debug)]
 pub struct UpdateCollectionsArgs {
@@ -52,11 +64,24 @@ pub fn parse_args() -> Result<Option<CliCommand>, String> {
             std::process::exit(0);
         }
         "--version" | "-V" => {
-            println!("osu-shelf {}", env!("CARGO_PKG_VERSION"));
+            println!("{}", version_text());
+            std::process::exit(0);
+        }
+        "--licences" | "--licenses" => {
+            // Not `print!`, which panics when a pager or `head` closes the pipe
+            // partway through this much text.
+            let _ = std::io::stdout().write_all(LICENCES.as_bytes());
             std::process::exit(0);
         }
         other => Err(format!("unknown subcommand: {other}")),
     }
+}
+
+fn version_text() -> String {
+    format!(
+        "osu-shelf {}\n{COPYRIGHT}\n{LEGAL_NOTICE}",
+        env!("CARGO_PKG_VERSION")
+    )
 }
 
 fn parse_update_collections(args: &[String]) -> Result<UpdateCollectionsArgs, String> {
@@ -116,25 +141,30 @@ fn parse_lazer_import(args: &[String]) -> Result<LazerImportArgs, String> {
 }
 
 fn print_help() {
-    println!(concat!(
-        "osu-shelf ",
-        env!("CARGO_PKG_VERSION"),
-        "\n\n",
-        "usage:\n",
-        "  osu-shelf                          launch TUI\n",
-        "  osu-shelf update-collections [opts] check and report missing beatmaps\n",
-        "  osu-shelf lazer-import [opts]       build one folder lazer imports all downloads from\n\n",
-        "update-collections options:\n",
-        "  --db <path>    override osu! database path\n",
-        "  --stable       use osu! stable database (default)\n",
-        "  --lazer        use osu! lazer database\n",
-        "  --dry-run      run without writing state\n",
-        "  --verbose      raise log level to debug\n\n",
-        "lazer-import options:\n",
-        "  --dir <path>   download directory (default: the last one used)\n",
-        "  --out <path>   folder to build (default: <dir>/lazer-import)",
-    ));
+    println!("{}", help_text());
 }
+
+fn help_text() -> String {
+    format!("{}\n\n{HELP_BODY}", version_text())
+}
+
+const HELP_BODY: &str = concat!(
+    "usage:\n",
+    "  osu-shelf                          launch TUI\n",
+    "  osu-shelf update-collections [opts] check and report missing beatmaps\n",
+    "  osu-shelf lazer-import [opts]       build one folder lazer imports all downloads from\n",
+    "  osu-shelf --licences                print the licence text and third-party licences\n",
+    "  osu-shelf --version                 print the version and licence notice\n\n",
+    "update-collections options:\n",
+    "  --db <path>    override osu! database path\n",
+    "  --stable       use osu! stable database (default)\n",
+    "  --lazer        use osu! lazer database\n",
+    "  --dry-run      run without writing state\n",
+    "  --verbose      raise log level to debug\n\n",
+    "lazer-import options:\n",
+    "  --dir <path>   download directory (default: the last one used)\n",
+    "  --out <path>   folder to build (default: <dir>/lazer-import)",
+);
 
 /// Build the lazer import folder from every run in the download directory and
 /// print what to do with it.

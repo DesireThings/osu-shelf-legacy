@@ -599,6 +599,27 @@ fn config_render_scrolls_to_focused_logging_field() {
     assert!(output.contains("logs directory"));
 }
 
+/// GPL 5(d): the notices stay on screen wherever the form is scrolled to.
+#[test]
+fn config_render_keeps_the_legal_notice_at_every_scroll_position() {
+    let mut app = App::new(Config::default());
+    app.active_tab = Tab::Config;
+
+    for focus in [ConfigField::Theme, ConfigField::Prereleases] {
+        app.config.focus = focus;
+        let output = render_app(&app, 80, 24);
+        for notice in [
+            "Copyright (C) 2026 DesireThings",
+            "GPL-3.0-or-later",
+            "NO WARRANTY",
+            "free to share and change",
+            "osu-shelf --licences",
+        ] {
+            assert!(output.contains(notice), "{notice:?} missing: {output}");
+        }
+    }
+}
+
 #[test]
 fn config_render_shows_download_help() {
     let mut app = App::new(Config::default());

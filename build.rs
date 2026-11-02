@@ -139,6 +139,38 @@ fn main() {
     println!("cargo:rerun-if-changed=vendor/realm-cpp/realm-core");
 
     emit_auth_credentials();
+    emit_licences();
+}
+
+/// Writes the text `osu-shelf --licences` prints to `$OUT_DIR/licences.txt`.
+/// The terminal app ships as one bare binary, so its licences travel inside it.
+/// Release builds set `OSU_SHELF_LICENCES` to the file from
+/// scripts/third-party-licenses.sh; any other build gets osu-shelf's own licences
+/// and a pointer to that file.
+fn emit_licences() {
+    println!("cargo:rerun-if-env-changed=OSU_SHELF_LICENCES");
+    println!("cargo:rerun-if-changed=NOTICE");
+    println!("cargo:rerun-if-changed=LICENSE");
+    println!("cargo:rerun-if-changed=LICENSE-MIT");
+
+    let out = PathBuf::from(env::var("OUT_DIR").unwrap()).join("licences.txt");
+    if let Ok(path) = env::var("OSU_SHELF_LICENCES") {
+        println!("cargo:rerun-if-changed={path}");
+        fs::copy(&path, &out).unwrap_or_else(|e| panic!("OSU_SHELF_LICENCES ({path}): {e}"));
+        return;
+    }
+
+    let mut text = String::new();
+    for file in ["NOTICE", "LICENSE", "LICENSE-MIT"] {
+        text.push_str(&fs::read_to_string(file).unwrap());
+        text.push('\n');
+    }
+    text.push_str(
+        "This build doesn't include the licences of its dependencies. Each release\n\
+         lists them in THIRD-PARTY-LICENSES.txt:\n\
+         https://github.com/DesireThings/osu-shelf/releases\n",
+    );
+    fs::write(&out, text).unwrap();
 }
 
 /// Builds the osu! API client id/secret (for guest searches) into the binary,

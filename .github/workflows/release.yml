@@ -116,7 +116,7 @@ jobs:
   # copies after a release or two.
   build:
     name: Build ${{ matrix.asset_name }}
-    needs: prepare
+    needs: [prepare, licences]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -175,18 +175,30 @@ jobs:
           key: ${{ matrix.os }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
+      # Built into the binary, so an install script or self-update that only
+      # fetches the binary still gets the licences (--licences).
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: cli-licences
+          path: licences-list
+
       - name: Build
+        env:
+          OSU_SHELF_LICENCES: licences-list/THIRD-PARTY-LICENSES.txt
         run: cargo build --locked --release --target ${{ matrix.target }}
 
       - name: Check it runs on the oldest supported macOS
         if: runner.os == 'macOS'
         run: scripts/check-macos-min.sh "$MACOSX_DEPLOYMENT_TARGET" "target/${{ matrix.target }}/release/osu-shelf" "target/${{ matrix.target }}/release/build"
 
-      - name: Check the version it reports
+      - name: Check the version and licences it reports
         run: |
-          out="$("target/${{ matrix.target }}/release/osu-shelf${{ matrix.ext }}" --version)"
+          bin="target/${{ matrix.target }}/release/osu-shelf${{ matrix.ext }}"
+          out="$("$bin" --version)"
           echo "$out"
-          [[ "$out" == "osu-shelf ${{ needs.prepare.outputs.version }}" ]]
+          [[ "$(head -n 1 <<< "$out")" == "osu-shelf ${{ needs.prepare.outputs.version }}" ]]
+          "$bin" --licences > licences-printed.txt
+          cmp licences-printed.txt licences-list/THIRD-PARTY-LICENSES.txt
 
       - name: Prepare asset
         run: |

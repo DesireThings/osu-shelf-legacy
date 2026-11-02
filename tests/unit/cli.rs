@@ -1,9 +1,49 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use super::{report_counts, row_tag};
+use super::{LICENCES, help_text, report_counts, row_tag, version_text};
 use crate::app::update_source::{MissingBeatmapset, MissingStatus, UpdateSource};
 use crate::osu_db::LocalCollection;
 use std::collections::HashMap;
+
+/// release.yml reads the first line of `--version` back as the version.
+#[test]
+fn cli_version_starts_with_the_bare_version_line() {
+    let text = version_text();
+    assert_eq!(
+        text.lines().next(),
+        Some(concat!("osu-shelf ", env!("CARGO_PKG_VERSION")))
+    );
+}
+
+/// GPL 5(d): copyright, no warranty, permission to share, how to see the licence.
+#[test]
+fn cli_version_and_help_show_the_legal_notices() {
+    for text in [version_text(), help_text()] {
+        for notice in [
+            "Copyright (C) 2026 DesireThings",
+            "GNU GPL version 3 or later",
+            "free to change and redistribute",
+            "NO WARRANTY",
+            "osu-shelf --licences",
+        ] {
+            assert!(text.contains(notice), "{notice:?} missing from: {text}");
+        }
+    }
+}
+
+#[test]
+fn cli_help_still_lists_the_commands() {
+    let text = help_text();
+    assert!(text.contains("update-collections options:"), "{text}");
+    assert!(text.contains("lazer-import options:"), "{text}");
+}
+
+#[test]
+fn cli_licences_embed_the_licence_texts() {
+    assert!(LICENCES.contains("Copyright (C) 2026 DesireThings"));
+    assert!(LICENCES.contains("GNU GENERAL PUBLIC LICENSE"));
+    assert!(LICENCES.contains("Copyright (c) 2026 uwuclxdy"));
+}
 
 /// Mirrors what `fetch_missing_beatmapsets` writes: a previously-deleted set is
 /// constructed already held back.
