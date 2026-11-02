@@ -89,6 +89,22 @@ let mut session = downloader.download_many(collection.beatmapset_ids(), "./downl
 - `Collection` exposes `beatmapset_ids()`, `beatmap_count()`, and `folder_name()`; the raw `Beatmapset` / `Beatmap` / `Uploader` data is public too.
 - Writing `collection.db` is deliberately **not** part of this library; pair it with the [osu-db](https://crates.io/crates/osu-db) crate in your app.
 
+To browse collections rather than fetch a known one:
+
+```rust
+use osu_downloader::collection::{CollectionClient, CollectionSort, PopularRange};
+
+let client = CollectionClient::new();
+let page = client.search("stream", CollectionSort::Favourites, None).await?;
+let more = client.search("stream", CollectionSort::Favourites, page.next_cursor).await?;
+let popular = client.popular(PopularRange::Month, None).await?;
+```
+
+- `search`, `popular` and `recent` each make one request and return a `CollectionPage` of up to `COLLECTIONS_PER_PAGE` `CollectionSummary` rows. They don't retry or sleep, so a 429 reaches the caller straight away.
+- `search` matches name, uploader and description. Sorting is highest first only, and the API has no tag, mode or size filters; filter the returned rows yourself.
+- `CollectionSummary::beatmap_count` counts difficulties, not beatmapsets. Fetch the collection for its beatmapsets.
+- These endpoints are undocumented, so their behaviour may change. `tests/api-scripts/test_osucollector_browse.sh` checks them against the live site.
+
 ## Events and summary
 
 `Event::BeatmapsetFailed` covers every failure path, including transient/network failures that exhausted every mirror; those arrive with `Error::Network(_)` (or another `Error::is_transient()` variant) and `mirror: None`. `Summary::failed` is `Vec<(u32, Error)>`; there is no separate "network errors" bucket.
