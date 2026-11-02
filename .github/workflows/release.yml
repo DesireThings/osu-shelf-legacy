@@ -91,9 +91,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
-      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
+      - name: Install Rust
+        run: rustup toolchain install
       # The prebuilt binary, not `cargo install`: compiling cargo-about took
       # minutes on every run. 0.9.2 is the version scripts/third-party-licenses.sh
       # expects.
@@ -149,10 +148,8 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
-          targets: ${{ matrix.target }}
+      - name: Install Rust
+        run: rustup toolchain install
 
       - name: Install native deps (Linux)
         if: runner.os == 'Linux'
@@ -176,9 +173,10 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: ${{ matrix.os }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --locked --release --target ${{ matrix.target }}
 
       - name: Check it runs on the oldest supported macOS
         if: runner.os == 'macOS'

@@ -1,9 +1,9 @@
 # Builds the desktop app's installers and keeps them as workflow artifacts:
 # Linux AppImage + .deb, Windows setup .exe (NSIS), macOS .dmg (Apple Silicon).
 # Nothing is published from here. It runs on pull requests that touch the
-# packaging, after every merge to main (so there's always a fresh installer
-# to try), by hand, and from release.yml (workflow_call), which attaches the
-# artifacts to the release.
+# packaging, after a merge to main that changes what goes in an installer (so
+# there's always a fresh one to try), by hand, and from release.yml
+# (workflow_call), which attaches the artifacts to the release.
 #
 # Unsigned: Windows shows a SmartScreen warning, and the macOS app is only
 # ad-hoc signed (bundle.macOS.signingIdentity "-"), so it opens through
@@ -14,6 +14,19 @@ on:
   push:
     branches:
       - main
+    # Merges that only touch docs or CI change nothing in an installer.
+    paths:
+      - src/**
+      - gui/**
+      - osu-downloader/**
+      - vendor/**
+      - scripts/**
+      - Cargo.toml
+      - Cargo.lock
+      - rust-toolchain.toml
+      - about.toml
+      - about.hbs
+      - .github/workflows/desktop.yml
   pull_request:
     paths:
       - .github/workflows/desktop.yml
@@ -50,9 +63,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
-      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
+      - name: Install Rust
+        run: rustup toolchain install
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 12.15.0
@@ -110,10 +122,8 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
-          targets: ${{ matrix.target }}
+      - name: Install Rust
+        run: rustup toolchain install
 
       - name: Install native deps (Linux)
         if: runner.os == 'Linux'
@@ -138,6 +148,7 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: desktop-${{ matrix.target }}-${{ matrix.os }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
@@ -156,7 +167,7 @@ jobs:
 
       - name: Build the installers
         working-directory: gui
-        run: pnpm tauri build --config src-tauri/tauri.release.conf.json --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+        run: pnpm tauri build --config src-tauri/tauri.release.conf.json --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} -- --locked
 
       # The AppImage carries Ubuntu's GTK/WebKitGTK libraries, which are only
       # known once linuxdeploy has collected them: add their notices to the
@@ -167,7 +178,7 @@ jobs:
           scripts/appimage-lib-notices.sh "$BUNDLE/appimage/osu-shelf.AppDir" > "$RUNNER_TEMP/appimage-libs.txt"
           { printf '\n'; cat "$RUNNER_TEMP/appimage-libs.txt"; } >> THIRD-PARTY-LICENSES-desktop.txt
           cd gui
-          pnpm tauri build --config src-tauri/tauri.release.conf.json --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+          pnpm tauri build --config src-tauri/tauri.release.conf.json --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} -- --locked
 
       - name: Check the licence list is inside the bundles
         run: |
