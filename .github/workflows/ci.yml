@@ -32,10 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
-          components: rustfmt
+      - name: Install Rust
+        run: rustup toolchain install
       - name: fmt --check
         run: cargo fmt --all -- --check
 
@@ -84,11 +82,7 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
-          components: clippy
-          targets: x86_64-unknown-linux-gnu
+        run: rustup toolchain install
 
       - name: Install dependencies
         run: |
@@ -103,20 +97,21 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: ubuntu-22.04
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       # --workspace covers the desktop app crate (gui/src-tauri) and osu-downloader;
       # plain cargo only builds default-members = ["."].
       - name: clippy
-        run: cargo clippy --workspace --all-targets --all-features --release --target x86_64-unknown-linux-gnu -- -D warnings
+        run: cargo clippy --locked --workspace --all-targets --all-features --release --target x86_64-unknown-linux-gnu -- -D warnings
 
       - name: test
-        run: cargo test --release --all-targets --all-features --target x86_64-unknown-linux-gnu
+        run: cargo test --locked --release --all-targets --all-features --target x86_64-unknown-linux-gnu
 
       - name: test desktop app crate
-        run: cargo test --release -p osu-shelf-gui --all-features --target x86_64-unknown-linux-gnu
+        run: cargo test --locked --release -p osu-shelf-gui --all-features --target x86_64-unknown-linux-gnu
 
       - name: test osu-downloader lib
-        run: cargo test --manifest-path osu-downloader/Cargo.toml --all-features
+        run: cargo test --locked --manifest-path osu-downloader/Cargo.toml --all-features
 
   build-windows:
     runs-on: windows-latest
@@ -126,23 +121,21 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
-          components: clippy
-          targets: x86_64-pc-windows-msvc
+        run: rustup toolchain install
 
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       # --workspace covers the desktop app crate (gui/src-tauri) and osu-downloader.
       - name: clippy
-        run: cargo clippy --workspace --all-targets --all-features --release --target x86_64-pc-windows-msvc -- -D warnings
+        run: cargo clippy --locked --workspace --all-targets --all-features --release --target x86_64-pc-windows-msvc -- -D warnings
 
       - name: test
-        run: cargo test --release --all-targets --all-features --target x86_64-pc-windows-msvc
+        run: cargo test --locked --release --all-targets --all-features --target x86_64-pc-windows-msvc
 
       - name: test desktop app crate
-        run: cargo test --release -p osu-shelf-gui --all-features --target x86_64-pc-windows-msvc
+        run: cargo test --locked --release -p osu-shelf-gui --all-features --target x86_64-pc-windows-msvc
 
   build-macos:
     # Pinned, not macos-latest, so the build machine only changes on purpose.
@@ -160,11 +153,7 @@ jobs:
         run: echo "MACOSX_DEPLOYMENT_TARGET=$(node -p "require('./gui/src-tauri/tauri.conf.json').bundle.macOS.minimumSystemVersion")" >> "$GITHUB_ENV"
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
-        with:
-          toolchain: stable
-          components: clippy
-          targets: aarch64-apple-darwin
+        run: rustup toolchain install
 
       - name: Install dependencies
         run: brew install cmake
@@ -173,21 +162,22 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: macos-15
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       # --workspace covers the desktop app crate (gui/src-tauri) and osu-downloader.
       - name: clippy
-        run: cargo clippy --workspace --all-targets --all-features --release --target aarch64-apple-darwin -- -D warnings
+        run: cargo clippy --locked --workspace --all-targets --all-features --release --target aarch64-apple-darwin -- -D warnings
 
       - name: test
-        run: cargo test --release --all-targets --all-features --target aarch64-apple-darwin
+        run: cargo test --locked --release --all-targets --all-features --target aarch64-apple-darwin
 
       - name: test desktop app crate
-        run: cargo test --release -p osu-shelf-gui --all-features --target aarch64-apple-darwin
+        run: cargo test --locked --release -p osu-shelf-gui --all-features --target aarch64-apple-darwin
 
       # Kept only for the check below, which reads the release binary and its
       # build-script outputs; nothing is packaged or uploaded from CI.
       - name: Build for macOS (arm64)
-        run: cargo build --release --target aarch64-apple-darwin
+        run: cargo build --locked --release --target aarch64-apple-darwin
 
       - name: Check it runs on the oldest supported macOS
         run: scripts/check-macos-min.sh "$MACOSX_DEPLOYMENT_TARGET" target/aarch64-apple-darwin/release/osu-shelf target/aarch64-apple-darwin/release/build
