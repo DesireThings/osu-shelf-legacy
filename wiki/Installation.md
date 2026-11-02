@@ -85,6 +85,8 @@ osu-shelf runs in a terminal. On Windows a double click usually opens it too, th
 
 The terminal app checks GitHub for a newer release on launch. With `update.auto_update = true` (the default) it downloads the release, checks it against the SHA-256 GitHub records for the file, then replaces itself. With `auto_update = false` it still checks and only notifies (toast + header indicator); press <kbd>u</kbd> to read the changelog and apply the update when you want. Opt into prerelease builds with `update.prereleases = true`. See [Configuration](Configuration#update).
 
+**Coming from 0.2.0 or earlier:** the old terminal app can't update itself past 0.6.0, because it looks for the old `osu-collect-*` file names and newer releases don't have them. Run the [one-line install](#one-line-install-recommended) again instead. Your settings are copied over the first time you start the new version, and you can then remove the old `osu-collect` program.
+
 ## Checking a download by hand
 
 Each release has a `SHA256SUMS` file. In the folder with your downloads: `sha256sum -c SHA256SUMS --ignore-missing` on Linux, `shasum -a 256 -c SHA256SUMS --ignore-missing` on macOS.

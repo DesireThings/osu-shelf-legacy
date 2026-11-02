@@ -110,10 +110,8 @@ jobs:
   # The terminal app. Each target builds on its NATIVE runner so realm-cpp
   # (vendored C++ submodule) links against the platform's own toolchain;
   # windows is MSVC, no cross-build. The asset names are what the self-updater
-  # and install scripts look for, so they only change with a bridge release:
-  # 0.3.0 publishes every binary under both its new osu-shelf-* name and the
-  # old osu-collect-* one, so 0.2.0's updater can still find it. Drop the old
-  # copies after a release or two.
+  # and install scripts look for, so a rename needs a bridge release that
+  # publishes both names, as 0.3.0 to 0.6.0 did for the osu-collect-* ones.
   build:
     name: Build ${{ matrix.asset_name }}
     needs: prepare
@@ -130,18 +128,15 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
             asset_name: osu-shelf-linux-x64
-            legacy_asset_name: osu-collect-linux-x64
             ext: ""
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             asset_name: osu-shelf-windows-x64
-            legacy_asset_name: osu-collect-windows-x64
             ext: .exe
           # Pinned, not macos-latest, so the build machine only changes on purpose.
           - target: aarch64-apple-darwin
             os: macos-15
             asset_name: osu-shelf-macos-arm64
-            legacy_asset_name: osu-collect-macos-arm64
             ext: ""
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -192,7 +187,6 @@ jobs:
         run: |
           mkdir -p out
           cp "target/${{ matrix.target }}/release/osu-shelf${{ matrix.ext }}" "out/${{ matrix.asset_name }}${{ matrix.ext }}"
-          cp "out/${{ matrix.asset_name }}${{ matrix.ext }}" "out/${{ matrix.legacy_asset_name }}${{ matrix.ext }}"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -234,11 +228,8 @@ jobs:
           d="osu-shelf-desktop-$VERSION"
           mkdir -p release
           cp artifacts/cli-osu-shelf-linux-x64/osu-shelf-linux-x64 \
-             artifacts/cli-osu-shelf-linux-x64/osu-collect-linux-x64 \
              artifacts/cli-osu-shelf-windows-x64/osu-shelf-windows-x64.exe \
-             artifacts/cli-osu-shelf-windows-x64/osu-collect-windows-x64.exe \
              artifacts/cli-osu-shelf-macos-arm64/osu-shelf-macos-arm64 \
-             artifacts/cli-osu-shelf-macos-arm64/osu-collect-macos-arm64 \
              artifacts/cli-licences/THIRD-PARTY-LICENSES.txt \
              "artifacts/desktop-linux-x64/$d-linux-x64.AppImage" \
              "artifacts/desktop-linux-x64/$d-linux-amd64.deb" \
@@ -246,8 +237,8 @@ jobs:
              "artifacts/desktop-windows-x64/$d-windows-x64-setup.exe" \
              "artifacts/desktop-macos-arm64/$d-macos-arm64.dmg" \
              release/
-          chmod +x release/osu-shelf-linux-x64 release/osu-collect-linux-x64 \
-                   release/osu-shelf-macos-arm64 release/osu-collect-macos-arm64 \
+          chmod +x release/osu-shelf-linux-x64 \
+                   release/osu-shelf-macos-arm64 \
                    "release/$d-linux-x64.AppImage"
           cd release
           sha256sum * > SHA256SUMS
