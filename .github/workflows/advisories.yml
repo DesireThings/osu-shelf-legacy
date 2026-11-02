@@ -7,8 +7,8 @@ name: advisories
 
 on:
   schedule:
-    # Mondays 06:17 UTC; off the hour, when scheduled runs queue up.
-    - cron: '17 6 * * 1'
+    # Mondays 06:23 UTC; off the hour, when scheduled runs queue up.
+    - cron: '23 6 * * 1'
   workflow_dispatch:
   # Runs once on a PR that changes this file, since a scheduled workflow only
   # exists on the default branch and could not be tried before merging.
