@@ -3247,7 +3247,6 @@ version = "0.22.0"
 dependencies = [
  "bytes",
  "criterion",
- "dashmap",
  "futures-util",
  "httpdate",
  "md-5",
@@ -3259,7 +3258,6 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
- "tokio-test",
  "tracing",
  "urlencoding",
 ]
@@ -3268,7 +3266,6 @@ dependencies = [
 name = "osu-shelf"
 version = "0.6.0"
 dependencies = [
- "bytes",
  "chrono",
  "cmake",
  "criterion",
@@ -3281,7 +3278,6 @@ dependencies = [
  "futures-util",
  "image",
  "link-cplusplus",
- "md-5",
  "osu-db",
  "osu-downloader",
  "ratatui",
@@ -3292,7 +3288,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.11.0",
- "smallvec",
  "tempfile",
  "thiserror 2.0.18",
  "time",
@@ -5448,17 +5443,6 @@ dependencies = [
  "futures-core",
  "pin-project-lite",
  "tokio",
-]
-
-[[package]]
-name = "tokio-test"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12bc5db7778a8e08ee255090861e0e7aac55e784300077e7ed293c7be36168b2"
-dependencies = [
- "futures-core",
- "tokio",
- "tokio-stream",
 ]
 
 [[package]]
