@@ -1,11 +1,11 @@
 # Maintainer: Kieran <kieran.parry2004@gmail.com>
 pkgname=osu-shelf
-pkgver=0.5.0
+pkgver=0.6.0
 pkgrel=1
 pkgdesc='Download osu!collector collections and import them into osu! (GUI and TUI)'
 arch=('x86_64')
 url='https://github.com/DesireThings/osu-shelf'
-license=('MIT' 'Apache-2.0')
+license=('GPL-3.0-or-later')
 # With LTO enabled, makepkg passes -flto to the C/C++ compilers; the GCC
 # bitcode objects in realm-core's and aws-lc's static archives then cannot be
 # linked by rustc's LLVM linker and every symbol is reported undefined.
@@ -48,7 +48,7 @@ source=(
   # needs, is not packaged for Arch. Pinned by checksum.
   "THIRD-PARTY-LICENSES-desktop.txt::$url/releases/download/v$pkgver/THIRD-PARTY-LICENSES-desktop.txt"
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' '7066caeed81c980a916986596144c35fed0712870d156c5bf1807794a881c022' 'cd48d6bcb40c95ae3936e624e291b329cb32a80fb10e976ed26a91b13923eaa8')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' '7066caeed81c980a916986596144c35fed0712870d156c5bf1807794a881c022' '457f0e4a68c8319941247e3e0a1e334557b7b7bcd55e840c3fcad5ff49e12a7d')
 
 prepare() {
   cd "$pkgname"
@@ -136,6 +136,12 @@ EOF
   install -Dm644 "$srcdir/THIRD-PARTY-LICENSES-desktop.txt" \
     "$pkgdir/usr/lib/$pkgname/THIRD-PARTY-LICENSES.txt"
 
+  # NOTICE keeps LICENSE-MIT in force for the code kept from osu-collect, and
+  # both it and LICENSE-APACHE for the bundled osu-downloader library.
+  install -Dm644 LICENSE \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 NOTICE \
+    "$pkgdir/usr/share/licenses/$pkgname/NOTICE"
   install -Dm644 LICENSE-MIT \
     "$pkgdir/usr/share/licenses/$pkgname/LICENSE-MIT"
   install -Dm644 LICENSE-APACHE \
