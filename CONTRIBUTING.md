@@ -45,7 +45,7 @@ The branch `main` is protected: pull requests need the `fmt`, `build-linux`, `bu
 
 ## Licence
 
-osu-shelf is licensed under MIT OR Apache-2.0. Unless you say otherwise, anything you contribute is licensed the same way, with no extra terms.
+osu-shelf is licensed under GPL-3.0-or-later, and the bundled `osu-downloader/` library under MIT OR Apache-2.0. Unless you say otherwise, anything you contribute is licensed the same way as the code it changes, with no extra terms.
 
 ## Who's who
 

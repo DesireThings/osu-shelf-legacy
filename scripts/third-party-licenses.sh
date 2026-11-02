@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Builds THIRD-PARTY-LICENSES.txt for a release: osu-shelf's own MIT notice,
-# the licences of every Rust crate built in (cargo-about, see about.toml /
+# Builds THIRD-PARTY-LICENSES.txt for a release: osu-shelf's own notice and GPL
+# text, the MIT notice of the code it keeps from upstream, the licences of
+# every Rust crate built in (cargo-about, see about.toml /
 # about.hbs), then realm-core's licence and third-party notices, since cargo
 # can't see that C++ submodule.
 #
@@ -37,8 +38,8 @@ done
 
 rule='================================================================================'
 
-# The header and osu-shelf's own licence. The MIT notice of osu-shelf
-# itself has to travel with every copy too, not only the dependencies'.
+# The header and osu-shelf's own licence. The GPL text and upstream's MIT
+# notice have to travel with every copy too, not only the dependencies' licences.
 {
     if $desktop; then
         printf 'THIRD-PARTY LICENCES FOR THE OSU-SHELF DESKTOP APP\n'
@@ -54,8 +55,13 @@ rule='==========================================================================
         printf 'osu-shelf itself, the Rust crates, and realm-core, the C++ database\n'
         printf "library it links to read osu!lazer's library.\n\n"
     fi
-    printf '%s\nosu-shelf: MIT OR Apache-2.0 (the MIT notice is below; LICENSE-APACHE\n' "$rule"
-    printf 'is in the source repository, https://github.com/DesireThings/osu-shelf)\n%s\n\n' "$rule"
+    printf '%s\nosu-shelf: GPL-3.0-or-later\n%s\n\n' "$rule" "$rule"
+    cat "$root/NOTICE"
+    printf '\n'
+    cat "$root/LICENSE"
+    printf '\n%s\nCode kept from osu-collect and osu-downloader: MIT OR Apache-2.0 (the MIT\n' "$rule"
+    printf 'notice is below; LICENSE-APACHE is in the source repository,\n'
+    printf 'https://github.com/DesireThings/osu-shelf)\n%s\n\n' "$rule"
     cat "$root/LICENSE-MIT"
     printf '\n'
 } > "$out"

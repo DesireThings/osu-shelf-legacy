@@ -428,11 +428,12 @@
     <h2>About</h2>
     <p>osu-shelf {version}</p>
     <p class="muted small">
-      Unofficial tool, not made by ppy (osu!) or osu!Collector. Free software under MIT OR
-      Apache-2.0; source code at github.com/DesireThings/osu-shelf.
+      Unofficial tool, not made by ppy (osu!) or osu!Collector. Copyright (C) 2026 DesireThings.
+      Free software under GPL-3.0-or-later, which lets you share and change it, with no
+      warranty; source code at github.com/DesireThings/osu-shelf.
     </p>
     <button class="secondary" onclick={toggleLicences}>
-      {showLicences ? "Hide" : "Show"} third-party licences
+      {showLicences ? "Hide" : "Show"} licences
     </button>
     {#if licencesError}
       <p class="error-text">{licencesError}</p>
