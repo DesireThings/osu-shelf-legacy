@@ -438,7 +438,7 @@ impl MirrorPool {
     }
 
     /// Current request spacing for the slot at `idx` (base if out of range).
-    #[cfg(feature = "instrument")]
+    #[cfg(any(test, feature = "instrument"))]
     pub(crate) fn interval(&self, idx: usize) -> Duration {
         let slots = self.slots.lock().unwrap();
         self.keys
