@@ -295,3 +295,47 @@ export interface Owned {
 }
 
 export const findOwned = () => invoke<Owned>("find_owned");
+
+/** How browse results are ordered; the popular sorts only apply with no search text. */
+export type BrowseSort =
+  | "relevance"
+  | "newest"
+  | "favourites"
+  | "maps"
+  | "popular_week"
+  | "popular_month"
+  | "popular_year"
+  | "popular_all_time";
+
+export interface BrowseCriteria {
+  query: string;
+  sort: BrowseSort;
+}
+
+export type BrowseMode = "osu" | "taiko" | "mania" | "catch";
+
+export interface BrowseRow {
+  id: number;
+  name: string;
+  /** Empty when the uploader wrote none. */
+  description: string;
+  uploader: string;
+  /** Difficulties, not map sets: listings don't count sets. */
+  difficulties: number;
+  favourites: number;
+  /** Upload time in seconds since the Unix epoch. */
+  uploaded: number | null;
+  main_mode: BrowseMode | null;
+  /** Whole-star buckets most maps sit in: [4, 6] means 4.00 to 6.99. */
+  stars: [number, number] | null;
+}
+
+export interface BrowsePage {
+  rows: BrowseRow[];
+  /** Matches in all; popular listings don't say. */
+  total: number | null;
+  next_cursor: number | null;
+}
+
+export const browseCollections = (criteria: BrowseCriteria, cursor: number | null = null) =>
+  invoke<BrowsePage>("browse_collections", { criteria, cursor });

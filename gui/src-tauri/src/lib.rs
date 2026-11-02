@@ -2,9 +2,9 @@
 //! with errors flattened to strings the frontend can show as-is.
 
 use osu_shelf::engine::{
-    self, CollectionPreview, DownloadOptions, DownloadStatus, Downloads, FindCheck, FindCriteria,
-    FindOptions, FindPage, FindPick, ImportFolderReport, Installs, Owned, ScanProgress, Settings,
-    UpdatePick, UpdateReport, Updates,
+    self, BrowseCriteria, BrowsePage, CollectionPreview, DownloadOptions, DownloadStatus,
+    Downloads, FindCheck, FindCriteria, FindOptions, FindPage, FindPick, ImportFolderReport,
+    Installs, Owned, ScanProgress, Settings, UpdatePick, UpdateReport, Updates,
 };
 use serde::Serialize;
 use std::{path::PathBuf, sync::Arc};
@@ -178,6 +178,18 @@ async fn download_found(pick: FindPick, downloads: State<'_, Downloads>) -> Resu
     engine::find::download(&downloads, &pick).map_err(|e| e.to_string())
 }
 
+/// One page of osu!Collector collections; `cursor` asks for the page after a
+/// previous one.
+#[tauri::command]
+async fn browse_collections(
+    criteria: BrowseCriteria,
+    cursor: Option<u64>,
+) -> Result<BrowsePage, String> {
+    engine::browse::browse(&criteria, cursor)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 /// Result of building the lazer import folder, plus where it is.
 #[derive(Serialize)]
 struct LazerImportResult {
@@ -240,6 +252,7 @@ pub fn run() {
             find_maps,
             find_owned,
             download_found,
+            browse_collections,
             third_party_licences,
         ])
         .run(tauri::generate_context!())
