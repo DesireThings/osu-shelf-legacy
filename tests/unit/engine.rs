@@ -77,6 +77,19 @@ fn tilde_in_the_stored_directory_is_expanded() {
     assert!(settings.download_dir.ends_with("maps"));
 }
 
+#[test]
+fn fetch_failures_get_a_message_that_says_what_to_do() {
+    use osu_downloader::Error;
+    let not_found = super::friendly_fetch_error(&Error::NotFound);
+    assert!(not_found.contains("doesn't exist"));
+    let limited = super::friendly_fetch_error(&Error::RateLimited { retry_after: None });
+    assert!(limited.contains("try again"));
+    let offline = super::friendly_fetch_error(&Error::Network("dns error".into()));
+    assert!(!offline.contains("dns"));
+    assert_eq!(offline, super::friendly_fetch_error(&Error::Timeout));
+    assert!(!super::friendly_fetch_error(&Error::HttpStatus(502)).contains("502"));
+}
+
 #[tokio::test]
 async fn preview_rejects_input_that_is_not_a_collection_link() {
     let err = preview_collection("definitely not a link")
