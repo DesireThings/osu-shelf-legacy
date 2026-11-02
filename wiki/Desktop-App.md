@@ -4,7 +4,7 @@ The desktop app is a window with buttons and text boxes instead of keyboard shor
 
 Installers for Windows, macOS (Apple Silicon) and Linux are on the [latest release](https://github.com/DesireThings/osu-shelf/releases/latest); see [Installation](Installation#desktop-app). It covers downloading collections, finding maps without a collection, updating the collections you downloaded, and getting them into osu!lazer.
 
-The sidebar has three steps, then **Find maps**, **Update collections** and Settings. You can go back to any of them at any time.
+The sidebar has three steps, then **Browse collections**, **Find maps**, **Update collections** and Settings. You can go back to any of them at any time.
 
 ## 1. Set up
 
@@ -37,6 +37,14 @@ Downloads keep running while you look at other steps.
 Running **Prepare import folder** again after more downloads only adds what's new. Delete the folder once osu! says the import finished. This is the same folder `osu-shelf lazer-import` builds; see [Importing into osu!](Importing-into-osu#several-collections-at-once).
 
 **osu! stable**: not automatic yet. Drag the downloaded `.osz` files into osu!, then merge each folder's `collection.db` with [Collection Manager](https://github.com/Piotrekol/CollectionManager).
+
+## Browse collections
+
+Finds collections on osu!Collector without leaving the app. It opens on the month's popular collections.
+
+1. Type a name, uploader or words from a description and press **Search** or <kbd>Enter</kbd>. **Sort** covers newest, most favourites and most difficulties, plus popular by week, month, year or all time when the box is empty. osu!Collector has no tags, so search words instead.
+2. Narrow the results with minimum and maximum difficulties, stars and main mode. These apply straight away to the results loaded so far, and **Load more** fetches up to three more pages to find matches. Star ranges are approximate, and sizes count difficulties, not map sets.
+3. **Add** puts a collection in your list and **Open on osu!Collector** opens its page in your browser. **Review your list** takes you to step 2, where you download as usual.
 
 ## Find maps
 

@@ -229,6 +229,6 @@ fn errors_read_as_sentences() {
     );
     assert_eq!(
         message(Error::Network("connection refused".to_string())),
-        "Couldn't reach osu!Collector: network error: connection refused"
+        "Couldn't reach osu!Collector. Check your connection and try again."
     );
 }

@@ -12,7 +12,7 @@
     type Entry,
   } from "./store.svelte";
 
-  let { onNext }: { onNext: () => void } = $props();
+  let { onNext, onBrowse }: { onNext: () => void; onBrowse: () => void } = $props();
 
   let link = $state("");
 
@@ -82,7 +82,8 @@
 <header class="page-head">
   <h1>Add collections</h1>
   <p class="muted">
-    Copy a collection's link from osucollector.com and paste it below. Add as many as you like,
+    Copy a collection's link from osucollector.com and paste it below, or
+    <button class="link inline-link" onclick={onBrowse}>browse osu!Collector</button>. Add as many as you like,
     then download them all.
   </p>
 </header>
@@ -104,7 +105,10 @@
 </form>
 
 {#if store.entries.length === 0}
-  <p class="muted empty">No collections yet. Paste a link above to start.</p>
+  <p class="muted empty">
+    No collections yet. Paste a link above or
+    <button class="link inline-link" onclick={onBrowse}>browse osu!Collector</button> to start.
+  </p>
 {:else}
   {#if notStarted.length > 1}
     <div class="actions left list-actions">
@@ -206,6 +210,11 @@
 {/if}
 
 <style>
+  /* Sits inside a sentence, so it takes the sentence's size. */
+  button.inline-link {
+    padding: 0;
+    font-size: inherit;
+  }
   .list-tools {
     display: flex;
     flex-wrap: wrap;

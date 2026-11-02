@@ -1,7 +1,9 @@
 // App-wide state that outlives a screen: the collections the user added and how
 // they're listed, the last update scan and what's picked from it, the last search and its picks,
-// and the downloads the backend is running. Switching pages in the sidebar keeps all of it.
+// the last collection browse, and the downloads the backend is running. Switching pages in the
+// sidebar keeps all of it.
 import {
+  browseCollections,
   cancelDownload,
   downloadFound,
   downloadUpdates,
@@ -13,6 +15,9 @@ import {
   previewCollection,
   scanUpdates,
   startDownload,
+  type BrowseCriteria,
+  type BrowseMode,
+  type BrowseRow,
   type CollectionPreview,
   type DownloadStatus,
   type FindCriteria,
@@ -29,6 +34,28 @@ export type Entry =
   | { key: number; input: string; state: "error"; message: string };
 
 export type CollectionSort = "newest" | "oldest" | "name" | "maps";
+
+/** What the API can't filter on, so it's applied to the rows loaded so far. */
+export interface BrowseFilters {
+  minDifficulties: number | null;
+  maxDifficulties: number | null;
+  mode: BrowseMode | "";
+  minStars: number | null;
+  maxStars: number | null;
+}
+
+export const noBrowseFilters: BrowseFilters = {
+  minDifficulties: null,
+  maxDifficulties: null,
+  mode: "",
+  minStars: null,
+  maxStars: null,
+};
+
+/** Listing pages one search or "Load more" may fetch. */
+const BROWSE_PAGES_PER_LOAD = 3;
+/** New filter matches that end a load early. */
+const BROWSE_MATCHES_PER_LOAD = 20;
 
 export const store = $state({
   entries: [] as Entry[],
@@ -68,6 +95,20 @@ export const store = $state({
     /** What the user already has; null until first read. */
     owned: null as Owned | null,
     hideOwned: false,
+  },
+  browse: {
+    /** The form as edited. */
+    criteria: { query: "", sort: "popular_month" } as BrowseCriteria,
+    filters: { ...noBrowseFilters },
+    searching: false,
+    loadingMore: false,
+    error: null as string | null,
+    /** The form as it was when the shown results were searched. */
+    searched: null as BrowseCriteria | null,
+    rows: [] as BrowseRow[],
+    /** Matches in all; popular listings don't say. */
+    total: null as number | null,
+    nextCursor: null as number | null,
   },
 });
 
@@ -299,4 +340,80 @@ export async function downloadPicked(): Promise<number | null> {
     f.downloadError = String(e);
     return null;
   }
+}
+
+/** Whether a row passes the filters. A star filter matches when the row's range overlaps it. */
+export function matchesBrowseFilters(row: BrowseRow, filters: BrowseFilters): boolean {
+  const { minDifficulties, maxDifficulties, mode, minStars, maxStars } = filters;
+  if (minDifficulties !== null && row.difficulties < minDifficulties) return false;
+  if (maxDifficulties !== null && row.difficulties > maxDifficulties) return false;
+  if (mode && row.main_mode !== mode) return false;
+  if (minStars === null && maxStars === null) return true;
+  if (!row.stars) return false;
+  const [from, to] = starBounds(row.stars);
+  return (minStars === null || to > minStars) && (maxStars === null || from <= maxStars);
+}
+
+/** The star ratings a row's buckets cover: from inclusive, to exclusive. Bucket 1 also holds maps
+ * under 1 star, and bucket 10 everything from 10 up. */
+export function starBounds([low, high]: [number, number]): [number, number] {
+  return [low === 1 ? 0 : low, high === 10 ? Infinity : high + 1];
+}
+
+/** Add pages from the browse cursor until enough rows pass the filters. A failure keeps the
+ * pages already loaded. */
+async function loadBrowsePages(criteria: BrowseCriteria) {
+  const b = store.browse;
+  let matches = 0;
+  for (let i = 0; i < BROWSE_PAGES_PER_LOAD; i++) {
+    const page = await browseCollections(criteria, b.nextCursor);
+    const known = new Set(b.rows.map((r) => r.id));
+    const fresh = page.rows.filter((r) => !known.has(r.id));
+    b.rows = [...b.rows, ...fresh];
+    b.total = page.total;
+    b.nextCursor = page.next_cursor;
+    matches += fresh.filter((r) => matchesBrowseFilters(r, b.filters)).length;
+    if (b.nextCursor === null || matches >= BROWSE_MATCHES_PER_LOAD) return;
+  }
+}
+
+/** Browse with the form as it is, replacing the shown results. */
+export async function browseSearch() {
+  const b = store.browse;
+  if (b.searching || b.loadingMore) return;
+  const criteria = $state.snapshot(b.criteria);
+  b.searching = true;
+  b.error = null;
+  b.searched = criteria;
+  b.rows = [];
+  b.total = null;
+  b.nextCursor = null;
+  try {
+    await loadBrowsePages(criteria);
+  } catch (e) {
+    b.error = String(e);
+  } finally {
+    b.searching = false;
+  }
+}
+
+/** Load further pages of the shown results. */
+export async function browseMore() {
+  const b = store.browse;
+  if (!b.searched || b.nextCursor === null || b.searching || b.loadingMore) return;
+  b.loadingMore = true;
+  b.error = null;
+  try {
+    await loadBrowsePages(b.searched);
+  } catch (e) {
+    b.error = String(e);
+  } finally {
+    b.loadingMore = false;
+  }
+}
+
+/** The list entry for a collection, whether it came from Browse or a pasted link. */
+export function entryForCollection(id: number): Entry | undefined {
+  const input = String(id);
+  return store.entries.find((e) => (e.state === "ready" ? e.preview.id === id : e.input === input));
 }
