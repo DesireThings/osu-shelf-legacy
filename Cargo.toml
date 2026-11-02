@@ -5,7 +5,7 @@ edition = "2024"
 rust-version = "1.90"
 authors = ["uwuclxdy", "DesireThings"]
 description = "Download osu!collector collections and import them into osu! (desktop and terminal app)"
-license = "MIT OR Apache-2.0"
+license = "GPL-3.0-or-later"
 repository = "https://github.com/DesireThings/osu-shelf"
 autotests = false
 

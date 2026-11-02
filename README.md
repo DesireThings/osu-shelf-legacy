@@ -193,4 +193,8 @@ The full guide is the [osu-shelf wiki](https://github.com/DesireThings/osu-shelf
 
 ## License
 
-Licensed under either of [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE) at your option, like upstream. Each release includes `THIRD-PARTY-LICENSES.txt` (terminal app) and `THIRD-PARTY-LICENSES-desktop.txt` (desktop app) with the licences of everything built into them; the desktop app also shows its list under **Settings → About**. Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this work shall be dual licensed as above, without any additional terms or conditions.
+osu-shelf is licensed under the [GNU General Public License v3.0 or later](LICENSE). See [NOTICE](NOTICE) for details. This applies to versions after 0.5.0; 0.5.0 and earlier stay under MIT OR Apache-2.0.
+
+Code kept from [uwuclxdy/osu-collect](https://github.com/uwuclxdy/osu-collect) is used under its [MIT](LICENSE-MIT) licence. The bundled `osu-downloader/` library stays under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+
+Each release includes `THIRD-PARTY-LICENSES.txt` (terminal app) and `THIRD-PARTY-LICENSES-desktop.txt` (desktop app) with the licences of everything built into them; the desktop app also shows its list under **Settings → About**. Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this work is licensed the same way as the code it changes, without any additional terms or conditions.

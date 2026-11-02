@@ -20,6 +20,8 @@ accepted = [
     "CDLA-Permissive-2.0",
     "MPL-2.0",
     "OpenSSL",
+    # osu-shelf's own crates; deny.toml keeps it off the list for dependencies.
+    "GPL-3.0-or-later",
 ]
 
 # The release targets (see .github/workflows/release.yml).
