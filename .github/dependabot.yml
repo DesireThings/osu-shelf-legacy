@@ -24,6 +24,11 @@ updates:
       interval: monthly
     commit-message:
       prefix: "chore(deps)"
+    # osu-db's newest code is 0.2.1: the higher 0.3.0 can't read a current
+    # osu!.db (see the pin in Cargo.toml). Lift this when a release above 0.3.0
+    # carries the fix.
+    ignore:
+      - dependency-name: osu-db
     groups:
       cargo:
         patterns: ["*"]
@@ -35,6 +40,11 @@ updates:
       interval: monthly
     commit-message:
       prefix: "chore(deps)"
+    # svelte-check can't run on TypeScript 7 alone (it wants 6 and 7 installed
+    # together, plus --tsgo), so a major bump is a job of its own.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
     groups:
       npm:
         patterns: ["*"]
