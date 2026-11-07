@@ -1,3 +1,5 @@
+This project is now named osu-shelf-legacy. It is the existing desktop and terminal application, with its history and licence notices preserved. The separate new osu-shelf application is being developed privately. Existing downloaded copies keep their previous name until you replace them. Do not install a new application's binary as an automatic update to this one.
+
 <div align="center">
 
 <h1>osu-shelf</h1>
