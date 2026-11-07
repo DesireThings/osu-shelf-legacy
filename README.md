@@ -29,17 +29,17 @@ osu-shelf downloads every map in an [osu!collector](https://osucollector.com) co
 - **Desktop app:** three steps (set up, add collections, import), plus finding maps by stars, mapper and more, and updating the collections you downloaded, with buttons and text boxes and plain-language messages. See [Desktop app](#desktop-app).
 - **Every collection into osu!lazer in one go:** however many collections you download, lazer imports them all, maps and collections, in a single pass of its setup wizard.
 - **No account needed:** paste a collection link and go.
-- **Nine mirrors with failover:** when a mirror rate-limits, the map waits and retries while the rest keep downloading. You can also skip the stuck ones and fetch them later. See [Mirrors](https://github.com/DesireThings/osu-shelf/wiki/Mirrors).
+- **Nine mirrors with failover:** when a mirror rate-limits, the map waits and retries while the rest keep downloading. You can also skip the stuck ones and fetch them later. See [Mirrors](https://github.com/DesireThings/osu-shelf-legacy/wiki/Mirrors).
 - **A real collection:** a verified `collection.db` next to the maps.
 - **Keep collections up to date:** check a downloaded collection again and fetch only new or missing maps.
-- **Find maps without a collection:** search by per-difficulty criteria through the osu! API or nzbasic's community database. See [Finding maps](https://github.com/DesireThings/osu-shelf/wiki/Finding-Maps).
+- **Find maps without a collection:** search by per-difficulty criteria through the osu! API or nzbasic's community database. See [Finding maps](https://github.com/DesireThings/osu-shelf-legacy/wiki/Finding-Maps).
 
 ## Installation
 
 > [!NOTE]
-> osu-shelf is in early access (version 0.x). The Windows and macOS desktop installers are built and checked automatically but haven't been run on a real Windows PC or Mac yet; please [open an issue](https://github.com/DesireThings/osu-shelf/issues/new) if one doesn't work.
+> osu-shelf is in early access (version 0.x). The Windows and macOS desktop installers are built and checked automatically but haven't been run on a real Windows PC or Mac yet; please [open an issue](https://github.com/DesireThings/osu-shelf-legacy/issues) if one doesn't work.
 
-**Desktop app:** download the file for your system from the [latest release](https://github.com/DesireThings/osu-shelf/releases/latest):
+**Desktop app:** download the file for your system from the [historical v0.6.0 release](https://github.com/DesireThings/osu-shelf-legacy/releases/tag/v0.6.0):
 
 | System | File |
 |---|---|
@@ -49,33 +49,11 @@ osu-shelf downloads every map in an [osu!collector](https://osucollector.com) co
 
 The apps aren't signed with a paid certificate, so the first start shows a warning: on Windows, **More info → Run anyway**; on macOS, **System Settings → Privacy & Security → Open Anyway**. The desktop app doesn't update itself yet; install a new version over the old one.
 
-**Terminal app** (updates itself):
+**Terminal app:** historical binaries are available on the [v0.6.0 release page](https://github.com/DesireThings/osu-shelf-legacy/releases/tag/v0.6.0). Their file names and installed command are still `osu-shelf`, not `osu-shelf-legacy`.
 
-Linux x64 / macOS Apple Silicon:
+The one-line installers and Arch package instructions are paused during the repository changeover. The current scripts and package recipe still fetch from the old repository address, which now belongs to the separate private new application. Changing only the script URL would not fix that. Do not use those installers or the terminal app's automatic update command until a matching legacy update is ready.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/DesireThings/osu-shelf/main/install.sh | bash
-```
-
-Windows x64 (PowerShell):
-
-```powershell
-iwr https://raw.githubusercontent.com/DesireThings/osu-shelf/main/install.bat -OutFile "$env:TEMP\osu-install.bat"; & "$env:TEMP\osu-install.bat"; Remove-Item "$env:TEMP\osu-install.bat"
-```
-
-Or download `osu-shelf-linux-x64`, `osu-shelf-windows-x64.exe` or `osu-shelf-macos-arm64` from the release. Building from source, uninstalling and more: [Installation](https://github.com/DesireThings/osu-shelf/wiki/Installation).
-
-### Arch Linux
-
-There is no AUR package yet, so the packaging files live in the repository at [`packaging/arch`](packaging/arch/README.md). They build both apps from source, with the desktop entry and icons:
-
-```bash
-git clone https://github.com/DesireThings/osu-shelf.git
-cd osu-shelf/packaging/arch
-makepkg -si
-```
-
-`makepkg -s` installs the build dependencies (Rust, CMake, a C++ compiler, Node.js and pnpm). The first build takes roughly 10–30 minutes because realm-core and the Tauri app are compiled from source.
+The [legacy wiki](https://github.com/DesireThings/osu-shelf-legacy/wiki) is retained for reference, but its installation and update instructions also need the repository changeover. This README correction does not change an installed app, script, package or release.
 
 ## Desktop app
 
@@ -89,7 +67,7 @@ makepkg -si
 
 **Update collections** checks the collections you downloaded for maps added on osu!collector since and downloads only those; map sets you deleted from osu! stay left out unless you pick them again.
 
-**Settings** covers mirrors (on/off, order, your own mirror links), download options and your own osu! API app. Full guide: [Desktop app](https://github.com/DesireThings/osu-shelf/wiki/Desktop-App).
+**Settings** covers mirrors (on/off, order, your own mirror links), download options and your own osu! API app. Full guide: [Desktop app](https://github.com/DesireThings/osu-shelf-legacy/wiki/Desktop-App).
 
 ## Terminal app
 
@@ -97,7 +75,7 @@ makepkg -si
 osu-shelf
 ```
 
-Paste a collection link, pick a folder, press <kbd>↵</kbd>. The get maps tab has two more sources: **find** searches maps by criteria, with no collection needed; **update** checks collections you downloaded and fetches only what's missing. Press <kbd>?</kbd> in the app for every key. Guides: [Usage](https://github.com/DesireThings/osu-shelf/wiki/Usage), [Finding maps](https://github.com/DesireThings/osu-shelf/wiki/Finding-Maps), [Updating collections](https://github.com/DesireThings/osu-shelf/wiki/Updating-Collections), [Keybindings](https://github.com/DesireThings/osu-shelf/wiki/Keybindings).
+Paste a collection link, pick a folder, press <kbd>↵</kbd>. The get maps tab has two more sources: **find** searches maps by criteria, with no collection needed; **update** checks collections you downloaded and fetches only what's missing. Press <kbd>?</kbd> in the app for every key. Guides: [Usage](https://github.com/DesireThings/osu-shelf-legacy/wiki/Usage), [Finding maps](https://github.com/DesireThings/osu-shelf-legacy/wiki/Finding-Maps), [Updating collections](https://github.com/DesireThings/osu-shelf-legacy/wiki/Updating-Collections), [Keybindings](https://github.com/DesireThings/osu-shelf-legacy/wiki/Keybindings).
 
 ## Importing into osu!
 
@@ -121,7 +99,7 @@ Drag the downloaded `.osz` files into osu!, then merge each folder's `collection
 
 </details>
 
-More detail: [Importing into osu!](https://github.com/DesireThings/osu-shelf/wiki/Importing-into-osu).
+More detail: [Importing into osu!](https://github.com/DesireThings/osu-shelf-legacy/wiki/Importing-into-osu).
 
 ## Configuration
 
@@ -133,12 +111,12 @@ Both apps share one optional config file. The desktop app's Settings page and th
 | macOS | `~/Library/Application Support/osu-shelf/config.toml` |
 | Windows | `%APPDATA%\osu-shelf\config.toml` |
 
-See [config.toml.example](config.toml.example) and [Configuration](https://github.com/DesireThings/osu-shelf/wiki/Configuration).
+See [config.toml.example](config.toml.example) and [Configuration](https://github.com/DesireThings/osu-shelf-legacy/wiki/Configuration).
 
 ## FAQ
 
 **Do I need an osu! account?**
-Not to download collections: osu-shelf never asks for your osu! login. Only the terminal app's find, when it searches through the osu! API, needs an API app of your own, which you make on your osu! account page; see [Finding maps](https://github.com/DesireThings/osu-shelf/wiki/Finding-Maps#your-osu-api-app).
+Not to download collections: osu-shelf never asks for your osu! login. Only the terminal app's find, when it searches through the osu! API, needs an API app of your own, which you make on your osu! account page; see [Finding maps](https://github.com/DesireThings/osu-shelf-legacy/wiki/Finding-Maps#your-osu-api-app).
 
 **Where do the maps come from?**
 The collection's details come from osu!Collector; the maps come from public beatmap mirrors, not from osu!'s servers. Which mirrors, and in what order, is up to you in the settings.
@@ -154,13 +132,13 @@ Yes, the [osu!Collector desktop client](https://osucollector.com/app). Its subsc
 
 ## Documentation
 
-The full guide is the [osu-shelf wiki](https://github.com/DesireThings/osu-shelf/wiki). Its pages live in [`wiki/`](wiki/) in this repository and are copied to the GitHub wiki automatically, so if a wiki link doesn't work yet, read the same page in [`wiki/`](wiki/Home.md).
+The full guide is the [osu-shelf wiki](https://github.com/DesireThings/osu-shelf-legacy/wiki). Its pages live in [`wiki/`](wiki/) in this repository and are copied to the GitHub wiki automatically, so if a wiki link doesn't work yet, read the same page in [`wiki/`](wiki/Home.md).
 
 ## Help and community
 
 - **Chat and quick help:** the [Discord server](https://discord.gg/qTFvdSM2f7).
-- **Questions and ideas:** [GitHub Discussions](https://github.com/DesireThings/osu-shelf/discussions), where answers stay findable.
-- **Bugs and feature requests:** [open an issue](https://github.com/DesireThings/osu-shelf/issues/new/choose); the form asks for what helps most.
+- **Questions and ideas:** [GitHub Discussions](https://github.com/DesireThings/osu-shelf-legacy/discussions), where answers stay findable.
+- **Bugs and feature requests:** [the legacy issue tracker](https://github.com/DesireThings/osu-shelf-legacy/issues).
 - **Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md). Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 - **Security problems:** report them privately, as described in [SECURITY.md](SECURITY.md).
 
